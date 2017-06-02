@@ -1,5 +1,6 @@
 import invariant from 'invariant';
-import { formatPattern } from 'react-router/lib/PatternUtils';
+import { formatPattern, matchPattern } from 'react-router/lib/PatternUtils';
+import { createParams } from 'react-router/lib/matchRoutes';
 import { createRoutes } from 'react-router/lib/RouteUtils';
 
 function makePaths(paths, route, basePath) {
@@ -55,9 +56,16 @@ export default function useNamedRoutes(createHistory) {
       const path = paths[name];
       invariant(path, 'Unknown route: %s', name);
 
+      const match = matchPattern(path, history.getCurrentLocation().pathname);
+
+      const params = {
+        ...createParams(match.paramNames, match.paramValues),
+        location.params
+      }
+
       return {
         ...location,
-        pathname: formatPattern(path, location.params),
+        pathname: formatPattern(path, params),
       };
     }
 
