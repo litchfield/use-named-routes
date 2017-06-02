@@ -32,7 +32,7 @@ function makePaths(paths, route, basePath) {
   }
 }
 
-export default function useNamedRoutes(history, routes) {
+export function useNamedRoutesHistory(history, routes) {
 
   const paths = {};
   createRoutes(routes).forEach(route => makePaths(paths, route, '/'));
@@ -95,4 +95,16 @@ export default function useNamedRoutes(history, routes) {
     createLocation,
   };
 
+}
+
+export default function useNamedRoutes(createHistory) {
+  return (options = {}) => {
+
+    const history = createHistory(options);
+
+    const { routes } = options;
+
+    return useNamedRoutesHistory(history, routes);
+
+  };
 }
