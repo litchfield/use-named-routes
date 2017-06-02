@@ -1,7 +1,32 @@
 import invariant from 'invariant';
 import { formatPattern, matchPattern } from 'react-router/lib/PatternUtils';
-import { createParams } from 'react-router/lib/matchRoutes';
 import { createRoutes } from 'react-router/lib/RouteUtils';
+
+
+// From react-router/lib/matchRoutes
+// Unfortunately these are not exported :-(
+
+function assignParams(params, paramNames, paramValues) {
+  return paramNames.reduce(function (params, paramName, index) {
+    var paramValue = paramValues && paramValues[index];
+
+    if (Array.isArray(params[paramName])) {
+      params[paramName].push(paramValue);
+    } else if (paramName in params) {
+      params[paramName] = [params[paramName], paramValue];
+    } else {
+      params[paramName] = paramValue;
+    }
+
+    return params;
+  }, params);
+}
+
+function createParams(paramNames, paramValues) {
+  return assignParams({}, paramNames, paramValues);
+}
+
+
 
 function makePaths(paths, route, basePath) {
   const { path, name, indexRoute, childRoutes } = route;
@@ -57,7 +82,7 @@ export function useNamedRoutesHistory(history, routes) {
 
     const params = {
       ...createParams(match.paramNames, match.paramValues),
-      location.params
+      ...location.params
     }
 
     return {
