@@ -32,70 +32,67 @@ function makePaths(paths, route, basePath) {
   }
 }
 
-export default function useNamedRoutes(createHistory) {
-  return (options = {}) => {
-    const history = createHistory(options);
+export default function useNamedRoutes(history, routes) {
 
-    const { routes } = options;
-    const paths = {};
-    createRoutes(routes).forEach(route => makePaths(paths, route, '/'));
+  const paths = {};
+  createRoutes(routes).forEach(route => makePaths(paths, route, '/'));
 
-    function resolveLocation(location) {
-      let name;
-      if (typeof location === 'string') {
-        if (location[0] !== '/') {
-          name = location;
-        }
-      } else {
-        name = location.name;
+  function resolveLocation(location) {
+    let name;
+    if (typeof location === 'string') {
+      if (location[0] !== '/') {
+        name = location;
       }
-      if (!name) {
-        return location;
-      }
-
-      const path = paths[name];
-      invariant(path, 'Unknown route: %s', name);
-
-      const match = matchPattern(path, history.getCurrentLocation().pathname);
-
-      const params = {
-        ...createParams(match.paramNames, match.paramValues),
-        location.params
-      }
-
-      return {
-        ...location,
-        pathname: formatPattern(path, params),
-      };
+    } else {
+      name = location.name;
+    }
+    if (!name) {
+      return location;
     }
 
-    function push(location) {
-      history.push(resolveLocation(location));
-    }
+    const path = paths[name];
+    invariant(path, 'Unknown route: %s', name);
 
-    function replace(location) {
-      history.replace(resolveLocation(location));
-    }
+    const match = matchPattern(path, history.getCurrentLocation().pathname);
 
-    function createPath(location) {
-      return history.createPath(resolveLocation(location));
-    }
-
-    function createHref(location) {
-      return history.createHref(resolveLocation(location));
-    }
-
-    function createLocation(location, ...args) {
-      return history.createLocation(resolveLocation(location), ...args);
+    const params = {
+      ...createParams(match.paramNames, match.paramValues),
+      location.params
     }
 
     return {
-      ...history,
-      push,
-      replace,
-      createPath,
-      createHref,
-      createLocation,
+      ...location,
+      pathname: formatPattern(path, params),
     };
+  }
+
+  function push(location) {
+    history.push(resolveLocation(location));
+  }
+
+  function replace(location) {
+    history.replace(resolveLocation(location));
+  }
+
+  function createPath(location) {
+    return history.createPath(resolveLocation(location));
+  }
+
+  function createHref(location) {
+    return history.createHref(resolveLocation(location));
+  }
+
+  function createLocation(location, ...args) {
+    return history.createLocation(resolveLocation(location), ...args);
+  }
+
+  return {
+    ...history,
+    push,
+    replace,
+    createPath,
+    createHref,
+    createLocation,
   };
+
 }
